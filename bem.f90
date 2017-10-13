@@ -112,14 +112,13 @@ program bem
           theta = atan2( m_2_vec(1,1)*t_vec(1,1)+m_2_vec(2,1)*t_vec(2,1) , m_2_vec(1,1)*n_vec(1,1)+m_2_vec(2,1)*n_vec(2,1)) &
                 - atan2( m_1_vec(1,1)*t_vec(1,1)+m_1_vec(2,1)*t_vec(2,1), m_1_vec(1,1)*n_vec(1,1)+m_1_vec(2,1)*n_vec(2,1))
         end if
-
       end if
-
+      print *, 180*theta/pi
       U(i,j) = 1/(2*pi) * ( (m_2_vec(1,1)*t_vec(1,1)+m_2_vec(2,1)*t_vec(2,1))*log(r_2) &
                             - (m_1_vec(1,1)*t_vec(1,1)+m_1_vec(2,1)*t_vec(2,1)) *log(r_1) &
                             + h - m_1_vec(1,1)*n_vec(1,1)+m_1_vec(2,1)*n_vec(2,1)*theta)
 
-      W(i,j) = 1/(2*pi) * theta
+      W(i,j) = theta / (2*pi)
     end do
   end do
 
@@ -130,12 +129,7 @@ program bem
     end do
   end do
 
-  Call dgesv(n, 1, U, N, ipiv, b_vec, n, info)
 
-  write(*, *) "端点"
-  write(*, *) "x:",end_point(:N,1)
-  write(*, *) "y:",end_point(:N,2)
-  write(*, *) "P",P(:N,1)
   print *,"U"
   do i = 1, N
     write(*, *) U(i,1:N)
@@ -144,6 +138,13 @@ program bem
   do i = 1, N
     write(*, *) W(i,1:N)
   enddo
+
+  Call dgesv(n, 1, U, N, ipiv, b_vec, n, info)
+
+  ! write(*, *) "端点"
+  ! write(*, *) "x:",end_point(:N,1)
+  ! write(*, *) "y:",end_point(:N,2)
+  ! write(*, *) "P",P(:N,1)
 
   print *,"TestSolition"
   write(*, *) test_ans
