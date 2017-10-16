@@ -18,12 +18,13 @@ program bem
   Integer,allocatable :: ipiv(:)
   !ここからはテストケース
 	double precision,allocatable :: test_ans(:)
+  double precision input_x,input_y,length,ans_u,hankei
 
   !実行部
   ! print *, "Please enter integers:R="
   ! read *, R
   ! めんどいから今は10固定
-  R = 1
+  R = 10
   ! print *, "Please enter integers:N="
   ! read *, N
   N= 100
@@ -138,7 +139,39 @@ program bem
   print *,"TestSolition"
   write(*, *) test_ans(1:4)
   print *,"Solition"
-  write(*, *) b_vec(1:4)
+  write(*, *) b_vec(1:4) !Nこの解の一部
+
+
+  ! 出力するためのうんコード
+  input_x = 0.0
+  input_y = 0.0
+  ! ファイル書き込み
+  open(1, file='data.dat', status='replace')
+  do i = 1,N
+    do j = 1,N
+        input_x = 2*R*i/N -R
+        input_y = 2*R*j/N -R
+        ans_u = 0.0
+        length = sqrt( input_x**2 + input_y**2 )
+        if(length >= R) then
+          ans_u = 0.0
+        else
+          !　内点計算
+          do k = 1,N
+              hankei = sqrt( (input_x - end_point(k,1))**2 + (input_y - end_point(k,2))**2 )
+              ans_u = ans_u -log(hankei)*b_vec(k)/(2*pi)
+              ans_u = ans_u - ( (input_x-end_point(k,1))*end_point(k,1)/R + (input_y - end_point(k,2))*end_point(k,2)/R ) &
+                          / (2*pi*hankei**2) * ans(k)
+          enddo
+        endif
+        ans_u = ans_u * 2*pi*R / N
+        write (1,*) input_x," ",input_y," ",ans_u
+    end do
+  enddo
+
+  close(1)
+
+
 
 
 
