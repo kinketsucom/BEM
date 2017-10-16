@@ -28,8 +28,6 @@ program bem
   ! print *, "Please enter integers:N="
   ! read *, N
   N= 100
-  ! print *, "Please enter axis:x="
-  ! read *, N
 
   print *, "N:",N,"Radius:",R
 
@@ -116,31 +114,12 @@ program bem
     end do
   end do
 
-  ! write(*, *) "端点"
-  ! write(*, *) "x:",end_point(:N,1)
-  ! write(*, *) "y:",end_point(:N,2)
-  ! write(*, *) "P",P(:N,1)
-
-  ! print *,"U"
-  ! do i = 1, N
-  !   write(*, *) U(i,1:N)
-  ! enddo
-  ! print *,"W"
-  ! do i = 1, N
-  !   write(*, *) W(i,1:N)
-  ! enddo
-  ! print *,"ans"
-  ! write(*, *) ans
-  ! print *,"b_vec"
-  ! write(*, *) b_vec
-
   Call DGESV(N, 1, U, N, ipiv, b_vec, N, info)
 
   print *,"TestSolition"
   write(*, *) test_ans(1:4)
   print *,"Solition"
   write(*, *) b_vec(1:4) !Nこの解の一部
-
 
   ! 出力するためのうんコード
   input_x = 0.0
@@ -171,7 +150,7 @@ program bem
 
   close(1)
 
-
+!
 
 
 
