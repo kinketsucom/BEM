@@ -1,9 +1,9 @@
 cd `dirname $0`
 gfortran ./bem.f90 -o do_bem -L. -llapack -lblas;
-echo "##Fin:compile"
+echo "#Fin#:compile"
 ./do_bem;
-echo "##Fin:execute"
-gnuplot
+echo "#Fin#:execute"
+# gnuplot
 # gnuplot <<- EOF
 # "";
 # splot 'data.dat';
