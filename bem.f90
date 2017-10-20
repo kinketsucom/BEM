@@ -31,8 +31,8 @@ program bem
   R = 10
   ! print *, "Please enter integers:N="
   ! read *, N
-  N= 100
-  mesh_num =100
+  N= 1000
+  mesh_num = 100
 
 
   print *, "N:",N,"Radius:",R
@@ -128,27 +128,41 @@ program bem
     err_sum = err_sum + abs(test_ans(i)-b_vec(i))
   end do
 
-  print *,"TestSolition"
-  write(*, *) test_ans(1:4)
-  print *,"Solition"
-  write(*, *) b_vec(1:4) !Nこの解の一部
-  print * , "err_sum:",err_sum
+  ! print *,"TestSolition"
+  ! write(*, *) test_ans(1:4)
+  ! print *,"Solition"
+  ! write(*, *) b_vec(1:4) !Nこの解の一部
+
+  ! open(1, file='q_calc.dat', status='replace')
+  !
+  !   do i = 1,N
+  !     write (1,*) i, " " , b_vec(i)
+  !   end do
+  ! close(1)
+  ! open(1, file='q_ans.dat', status='replace')
+  !
+  !   do i = 1,N
+  !     write (1,*) i, " " , test_ans(i)
+  !   end do
+  ! close(1)
+
+
+  print * , "err_sum:",err_sum/N
 
   ! 出力するためのうんコード
-  count = 1
+  count = 0
   do i = 1,mesh_num**2
-      input(i,1) = (R*((i/mesh_num)-1))/(mesh_num+1)*cos(2*pi*(i-1)/mesh_num)
-      input(i,2) = (R*((i/mesh_num)-1))/(mesh_num+1)*sin(2*pi*(i-1)/mesh_num)
-
+      ! input(i,1) = (R*((i/mesh_num)-1))/(mesh_num+1)*cos(2*pi*(i-1)/mesh_num)
+      ! input(i,2) = (R*((i/mesh_num)-1))/(mesh_num+1)*sin(2*pi*(i-1)/mesh_num)
     !inputを内点としてとる
 
 
-    ! count = count + 1
-    !   input(i,1) = 2*R*(i/mesh_num +1 )/mesh_num - R
-    ! if (mod(count,mesh_num) == 0 ) then
-    !   count = 1
-    ! end if
-    !   input(i,2) = 2*R*count/mesh_num - R
+    count = count + 1
+      input(i,1) = 2*R*(i/mesh_num +1 )/mesh_num - R
+    if (mod(count,mesh_num) == 0 ) then
+      count = 1
+    end if
+      input(i,2) = 2*R*count/mesh_num - R
         ! ans_u = 0.0
         ! length = sqrt( input_x**2 + input_y**2 )
         ! if(length >= R) then
@@ -165,9 +179,6 @@ program bem
         ! ans_u = ans_u * 2*pi*R / split_num
         ! write (1,*) input_x," ",input_y," ",ans_u
   end do
-
-
-
 
   !もういっぱつ
   ! U mesh,n
@@ -227,7 +238,6 @@ program bem
 ! print *, "W2"
 ! print *, W2
 
-
 ! ファイル書き込み
 open(1, file='data.dat', status='replace')
 err_sum=0.0
@@ -239,7 +249,7 @@ do i = 1,mesh_num**2
       else
         ! 内点計算
           do j = 1,N
-          ans_u = ans_u +  U2(i,j) * b_vec(j) - W2(i,j) * ( end_point(j,1)**3 - 3*end_point(j,1)*end_point(j,2)**2 )
+            ans_u = ans_u + U2(i,j) * b_vec(j) - W2(i,j) * funcU(end_point(j,1),end_point(j,2))
             ! hankei = sqrt( (input(i,1) - end_point(k,1))**2 + (input(i,2) - end_point(k,2))**2 )
             ! ans_u = ans_u -log(hankei)*b_vec(k)/(2*pi)
             ! ans_u = ans_u - ( (input(i,1)-end_point(k,1))*end_point(k,1)/R + (input(i,2) - end_point(k,2))*end_point(k,2)/R ) &
@@ -256,7 +266,7 @@ end do
 ! print *, "U2",U2(13,:)
 
 
-print *,"err_sum:", err_sum
+print *,"err_sum:", err_sum/mesh_num**2
 ! print * , "x:y"
 ! do i = 1, mesh_num**2
 !   print * ,input(i,1),input(i,2)
@@ -265,5 +275,10 @@ print *,"err_sum:", err_sum
 close(1)
 
 
-
 end program bem
+
+
+function funcU(x,y)
+  double precision x,y
+  funcU = x**3-3*x*y**2
+end function
