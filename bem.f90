@@ -12,12 +12,17 @@ program bem
 	double precision,allocatable :: W(:,:)
   double precision,allocatable :: U2(:,:)
   double precision,allocatable :: W2(:,:)
+  double precision,allocatable :: theta1(:,:)
+  double precision,allocatable :: theta2(:,:)
 	double precision,dimension(1,1) :: t_vec(2,1)=(0,0)
 	double precision,dimension(1,1) :: n_vec(2,1)=(0,0)
 	double precision,dimension(1,1) :: m_1_vec(2,1)=(0,0)
 	double precision,dimension(1,1) :: m_2_vec(2,1)=(0,0)
 	double precision x,y,r_1,r_2,h,theta
   Integer,allocatable :: ipiv(:)
+  double precision,allocatable :: point_x1_vec(:,:)
+  double precision,allocatable :: point_x2_vec(:,:)
+
   !ここからはテストケース
 	double precision,allocatable :: test_ans(:)
   double precision,allocatable :: input(:,:)
@@ -31,8 +36,8 @@ program bem
   R = 10
   ! print *, "Please enter integers:N="
   ! read *, N
-  N= 1000
-  mesh_num = 100
+  N= 100
+  mesh_num = 50
 
 
   print *, "N:",N,"Radius:",R
@@ -43,6 +48,10 @@ program bem
   allocate( W(N,N) )
   allocate( U2(mesh_num**2,N) )
   allocate( W2(mesh_num**2,N) )
+  allocate( point_x1_vec(max(mesh_num,N),2) )
+  allocate( point_x2_vec(max(mesh_num,N),2) )
+  allocate( theta1(N,1))
+  allocate( theta2(mesh_num**2,1))
   allocate( ans(N) )
   allocate( test_ans(N) )
   allocate( ipiv(N) )
@@ -63,7 +72,7 @@ program bem
       P(i,1) = (end_point(i,1)+end_point(1,1)) / 2
       P(i,2) = (end_point(i,2)+end_point(1,2)) / 2
     end if
-    ans(i) = P(i,1)**3 - 3*P(i,1)*(P(i,2)**2) !u(Pj)のこと
+    ans(i) = funcU( P(i,1), P(i,2) ) !u(Pj)のこと
     test_ans(i) = ( 3*(P(i,1)**3) - 9*P(i,1)*(P(i,2))**2 )/R !微分u(Pj)の理論値的なあれ
   enddo
 
@@ -90,14 +99,18 @@ program bem
         t_vec(1,1) = (end_point(1,1)- end_point(j,1))/h
         t_vec(2,1) = (end_point(1,2)- end_point(j,2))/h
       end if
+
+
+
       !n_vecの計算
       n_vec(1,1) = -t_vec(2,1)
       n_vec(2,1) = t_vec(1,1)
       !r_1とr_2の計算
       r_1 = sqrt( m_1_vec(1,1)**2 + m_1_vec(2,1)**2)
       r_2 = sqrt( m_2_vec(1,1)**2 + m_2_vec(2,1)**2)
+
       !thetaの計算
-      if( abs(m_2_vec(1,1)*n_vec(1,1)+m_2_vec(2,1)*n_vec(2,1)) < 0.0001 .and. &
+      if( abs(m_2_vec(1,1)*n_vec(1,1)+m_2_vec(2,1)*n_vec(2,1)) < 0.0001 .or. &
         abs( m_1_vec(1,1)*n_vec(1,1)+m_1_vec(2,1)*n_vec(2,1)) < 0.0001 ) then
         theta = abs(atan2( m_2_vec(1,1)*t_vec(1,1)+m_2_vec(2,1)*t_vec(2,1), m_2_vec(1,1)*n_vec(1,1)+m_2_vec(2,1)*n_vec(2,1))  &
               - atan2( m_1_vec(1,1)*t_vec(1,1)+m_1_vec(2,1)*t_vec(2,1), m_1_vec(1,1)*n_vec(1,1)+m_1_vec(2,1)*n_vec(2,1) ))
@@ -111,8 +124,12 @@ program bem
                             + h - (m_1_vec(1,1)*n_vec(1,1)+m_1_vec(2,1)*n_vec(2,1))*theta ) /(2*pi)
 
       W(i,j) = theta / (2*pi)
+
     end do
   end do
+
+
+
 
   !Wuの計算
   do i = 1,N
@@ -180,6 +197,7 @@ program bem
         ! write (1,*) input_x," ",input_y," ",ans_u
   end do
 
+
   !もういっぱつ
   ! U mesh,n
     do i = 1,mesh_num**2
@@ -215,7 +233,7 @@ program bem
         r_2 = sqrt( m_2_vec(1,1)**2 + m_2_vec(2,1)**2 )
         ! print * , i,j,m_1_vec
         !thetaの計算
-        if( abs(m_2_vec(1,1)*n_vec(1,1)+m_2_vec(2,1)*n_vec(2,1)) < 0.0001 .and. &
+        if( abs(m_2_vec(1,1)*n_vec(1,1)+m_2_vec(2,1)*n_vec(2,1)) < 0.0001 .or. &
           abs( m_1_vec(1,1)*n_vec(1,1)+m_1_vec(2,1)*n_vec(2,1)) < 0.0001 ) then
           theta = abs(atan2( m_2_vec(1,1)*t_vec(1,1)+m_2_vec(2,1)*t_vec(2,1), m_2_vec(1,1)*n_vec(1,1)+m_2_vec(2,1)*n_vec(2,1))  &
                 - atan2( m_1_vec(1,1)*t_vec(1,1)+m_1_vec(2,1)*t_vec(2,1), m_1_vec(1,1)*n_vec(1,1)+m_1_vec(2,1)*n_vec(2,1) ))
@@ -233,6 +251,7 @@ program bem
       end do
     end do
 
+
 ! print *, "U2"
 ! print *, U2
 ! print *, "W2"
@@ -244,23 +263,19 @@ err_sum=0.0
 do i = 1,mesh_num**2
       ans_u = 0.0
       length = sqrt( input(i,1)**2 + input(i,2)**2 )
-      if(length >= R) then
-        ! ans_u = 0.0
-      else
+      if(length < R) then
         ! 内点計算
           do j = 1,N
-            ans_u = ans_u + U2(i,j) * b_vec(j) - W2(i,j) * funcU(end_point(j,1),end_point(j,2))
+            ans_u = ans_u + U2(i,j) * b_vec(j) - W2(i,j) * funcU( end_point(j,1), end_point(j,2) )
             ! hankei = sqrt( (input(i,1) - end_point(k,1))**2 + (input(i,2) - end_point(k,2))**2 )
             ! ans_u = ans_u -log(hankei)*b_vec(k)/(2*pi)
             ! ans_u = ans_u - ( (input(i,1)-end_point(k,1))*end_point(k,1)/R + (input(i,2) - end_point(k,2))*end_point(k,2)/R ) &
             !             / (2*pi*hankei**2) * ans(k)
           end do
           write (1,*) input(i,1)," ",input(i,2)," ",ans_u
-          kai = input(i,1)**3-3*input(i,1)*input(i,2)**2
-          ! print *, ans_u, kai, kai/ans_u
+          kai = funcU( input(i,1),input(i,2) )
           err_sum = err_sum + abs(kai-ans_u)
       end if
-      ! ans_u = ans_u * 2*pi*R / split_num
 end do
 
 ! print *, "U2",U2(13,:)

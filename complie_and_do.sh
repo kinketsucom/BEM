@@ -1,8 +1,9 @@
 cd `dirname $0`
-gfortran ./bem.f90 -o do_bem -L. -llapack -lblas;
+gfortran ./newbem.f90 -o do_new_bem -L. -llapack -lblas;
 echo "#Fin#:compile"
-./do_bem;
+./do_new_bem;
 echo "#Fin#:execute"
+# gfortran ./bem.f90 -o do_bem -L. -llapack -lblas;
 # gnuplot
 # gnuplot <<- EOF
 # "";
