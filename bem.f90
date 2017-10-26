@@ -266,11 +266,7 @@ do i = 1,mesh_num**2
       if(length < R) then
         ! 内点計算
           do j = 1,N
-            ans_u = ans_u + U2(i,j) * b_vec(j) - W2(i,j) * funcU( end_point(j,1), end_point(j,2) )
-            ! hankei = sqrt( (input(i,1) - end_point(k,1))**2 + (input(i,2) - end_point(k,2))**2 )
-            ! ans_u = ans_u -log(hankei)*b_vec(k)/(2*pi)
-            ! ans_u = ans_u - ( (input(i,1)-end_point(k,1))*end_point(k,1)/R + (input(i,2) - end_point(k,2))*end_point(k,2)/R ) &
-            !             / (2*pi*hankei**2) * ans(k)
+            ans_u = ans_u + U2(i,j)*b_vec(j) - W2(i,j)*funcU( end_point(j,1), end_point(j,2) )
           end do
           write (1,*) input(i,1)," ",input(i,2)," ",ans_u
           kai = funcU( input(i,1),input(i,2) )
